@@ -17,3 +17,7 @@ export function selectText(element) {
         alert("none");
     }
 }
+
+export const txt = `
+
+`

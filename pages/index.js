@@ -1,8 +1,18 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback,useMemo } from "react";
 import marked from "marked";
-import { Layout, Input, Row, Col, Button, message, Select } from "antd";
-import { selectText } from "../utils/index";
+import {
+  Layout,
+  Input,
+  Row,
+  Col,
+  Button,
+  message,
+  Select,
+  Popover,
+} from "antd";
+import { selectText ,txt} from "../utils/index";
 import hljs from "highlight.js";
+import { TwitterPicker } from "react-color";
 
 const { Header, Content } = Layout;
 const { Option } = Select;
@@ -45,7 +55,8 @@ let codeArr = [
 ];
 
 export default function Home() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(txt);
+  const [colorTheme, setColorTheme] = useState("#00d084");
   const [codeSelect, setCodeSelect] = useState("");
   useEffect(() => {
     marked.setOptions({
@@ -59,15 +70,30 @@ export default function Home() {
         return marked(plainText); // Returns HTML from a custom parser
       },
     });
+
     simplemde.codemirror.on("change", () => {
       setInput(simplemde.value());
     });
   }, []);
 
+  let renderer = useMemo(()=>{
+    const renderer = new marked.Renderer();
+    renderer.heading = function(text, level) {
+        return `<h${level} style="color:${colorTheme}"  id="${text}">${text}</h${level}>`;
+    }; 
+    return renderer
+  },[colorTheme])
+
   let copyFn = useCallback(() => {
     selectText("edit-wrap");
     document.execCommand("copy");
     message.success("复制完成");
+  }, []);
+
+  let themeFn = useCallback((color) => {
+    const { hex } = color;
+    setColorTheme(hex);
+    document.body.setAttribute("style", `--themeColor:${hex}`);
   }, []);
 
   return (
@@ -100,6 +126,30 @@ export default function Home() {
                   );
                 })}
               </Select>
+              <Popover
+                trigger="hover"
+                content={<TwitterPicker triangle="hide" onChange={themeFn} />}
+              >
+                <Button
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                  }}
+                  type="default"
+                >
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      background: colorTheme,
+                      borderRadius: 3,
+                      marginRight: 5,
+                    }}
+                  ></div>{" "}
+                  主题选择
+                </Button>
+              </Popover>
               <Button onClick={copyFn} type="primary">
                 全文复制
               </Button>
@@ -108,7 +158,7 @@ export default function Home() {
               className={`edit-wrap hljs ${codeSelect}`}
               id="edit-wrap"
               style={{ maxWidth: "578px", margin: "auto" }}
-              dangerouslySetInnerHTML={{ __html: marked(input) }}
+              dangerouslySetInnerHTML={{ __html: marked(input,{renderer:renderer}) }}
             ></div>
           </Col>
         </Row>

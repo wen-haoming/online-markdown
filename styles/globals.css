@@ -1,5 +1,6 @@
 html,
 body {
+  --themeColor: #00d084;
   padding: 0;
   margin: 0;
   height: 100%;
@@ -28,7 +29,10 @@ p{
   display: flex;
   justify-content: space-between;
   align-content: flex-start;
-  padding: 0px 60px 10px 60px;
+  padding: 5px 60px 10px 60px;
+}
+.ant-popover-inner-content{
+  padding: 5px;
 }
 
 
