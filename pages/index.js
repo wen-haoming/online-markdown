@@ -1,65 +1,118 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import { useEffect, useState, useCallback } from "react";
+import marked from "marked";
+import { Layout, Input, Row, Col, Button, message, Select } from "antd";
+import { selectText } from "../utils/index";
+import hljs from "highlight.js";
+
+const { Header, Content } = Layout;
+const { Option } = Select;
+const { TextArea } = Input;
+
+let codeArr = [
+  "brown-paper",
+  "github",
+  "dark",
+  "a11-dark",
+  "a11-light",
+  "agate",
+  "an-old-hope",
+  "androidstudio",
+  "arduino-light",
+  "arta",
+  "ascetic",
+  "atelier-cave-dark",
+  "atelier-cave-light",
+  "atelier-dune-dark",
+  "atelier-dune-light",
+  "atelier-estuary-dark",
+  "atelier-estuary-light",
+  "atelier-forest-dark",
+  "atelier-forest-light",
+  "atelier-heath-dark",
+  "atelier-heath-light",
+  "atelier-lakeside-dark",
+  "atelier-lakeside-light",
+  "atelier-plateau-dark",
+  "atelier-plateau-light",
+  "atelier-savanna-dark",
+  "atelier-savanna-light",
+  "atelier-seaside-dark",
+  "atelier-seaside-light",
+  "atelier-sulphurpool-dark",
+  "atelier-sulphurpool-light",
+  "atom-one-dark",
+  "atom-one-light",
+];
 
 export default function Home() {
+  const [input, setInput] = useState("");
+  const [codeSelect, setCodeSelect] = useState("");
+  useEffect(() => {
+    marked.setOptions({
+      highlight: (code) => hljs.highlightAuto(code).value,
+      langPrefix: "hljs lang-",
+    });
+
+    var simplemde = new SimpleMDE({
+      element: document.getElementById("TextArea"),
+      previewRender: function(plainText) {
+        return marked(plainText); // Returns HTML from a custom parser
+      },
+    });
+    simplemde.codemirror.on("change", () => {
+      setInput(simplemde.value());
+    });
+  }, []);
+
+  let copyFn = useCallback(() => {
+    selectText("edit-wrap");
+    document.execCommand("copy");
+    message.success("复制完成");
+  }, []);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    <Layout>
+      <Header style={{ height: "10vh" }} style={{ background: "#fafafa" }}>
+        <p>在线markdown转换微信公众号文章排版</p>
+      </Header>
+      <Content style={{ paddingLeft: 5, paddingRight: 5, background: "#fff" }}>
+        <Row>
+          <Col span={12}>
+            <div>
+              <TextArea
+                id="TextArea"
+                onChange={(e) => setInput(e.target.value)}
+              />
+            </div>
+          </Col>
+          <Col span={12}>
+            <div className="btns-wrap">
+              <Select
+                style={{ width: 150 }}
+                placeholder="代码主题"
+                onChange={setCodeSelect}
+              >
+                {codeArr.map((item, idx) => {
+                  return (
+                    <Option key={idx} value={item}>
+                      {item}
+                    </Option>
+                  );
+                })}
+              </Select>
+              <Button onClick={copyFn} type="primary">
+                全文复制
+              </Button>
+            </div>
+            <div
+              className={`edit-wrap hljs ${codeSelect}`}
+              id="edit-wrap"
+              style={{ maxWidth: "578px", margin: "auto" }}
+              dangerouslySetInnerHTML={{ __html: marked(input) }}
+            ></div>
+          </Col>
+        </Row>
+      </Content>
+    </Layout>
+  );
 }

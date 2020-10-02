@@ -2,6 +2,7 @@ html,
 body {
   padding: 0;
   margin: 0;
+  height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
@@ -11,6 +12,24 @@ a {
   text-decoration: none;
 }
 
-* {
-  box-sizing: border-box;
+p{
+  margin: 0;
 }
+
+.edit-wrap{
+     padding:20px;
+     width: 578px;
+     height: 100%;
+     border: 1px solid #ccc;
+     background:#fff;
+     border-radius: 5px;
+  }
+.btns-wrap{
+  display: flex;
+  justify-content: space-between;
+  align-content: flex-start;
+  padding: 0px 60px 10px 60px;
+}
+
+
+
