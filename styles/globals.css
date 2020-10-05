@@ -1,11 +1,19 @@
 html,
 body {
-  --themeColor: #00d084;
-  padding: 0;
   margin: 0;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB,
+    Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol;
+  font-variant: tabular-nums;
+  font-feature-settings: 'tnum';
+  
+  --border-color: rgb(226, 232, 240);
+  --header-height: 3.6rem;
+  --sidebar-width: 16.4rem;
+  --text-color: #2c3e50;
+  --text-color-light: #476582;
+  --code-bg-color: #282c34;
+  --accent-color: #3eaf7c;
 }
 
 a {
@@ -25,6 +33,7 @@ p{
      background:#fff;
      border-radius: 5px;
   }
+
 .btns-wrap{
   display: flex;
   justify-content: space-between;

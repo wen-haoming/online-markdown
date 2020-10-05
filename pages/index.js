@@ -1,5 +1,4 @@
-import { useEffect, useState, useCallback,useMemo } from "react";
-import marked from "marked";
+import { useEffect, useState, useCallback,useMemo,useRef } from "react";
 import {
   Layout,
   Input,
@@ -11,77 +10,102 @@ import {
   Popover,
 } from "antd";
 import { selectText ,txt} from "../utils/index";
-import hljs from "highlight.js";
 import { TwitterPicker } from "react-color";
+import Prism from 'prismjs'
 
 const { Header, Content } = Layout;
 const { Option } = Select;
 const { TextArea } = Input;
 
+
 let codeArr = [
-  "brown-paper",
-  "github",
-  "dark",
-  "a11-dark",
-  "a11-light",
-  "agate",
-  "an-old-hope",
-  "androidstudio",
-  "arduino-light",
-  "arta",
-  "ascetic",
-  "atelier-cave-dark",
-  "atelier-cave-light",
-  "atelier-dune-dark",
-  "atelier-dune-light",
-  "atelier-estuary-dark",
-  "atelier-estuary-light",
-  "atelier-forest-dark",
-  "atelier-forest-light",
-  "atelier-heath-dark",
-  "atelier-heath-light",
-  "atelier-lakeside-dark",
-  "atelier-lakeside-light",
-  "atelier-plateau-dark",
-  "atelier-plateau-light",
-  "atelier-savanna-dark",
-  "atelier-savanna-light",
-  "atelier-seaside-dark",
-  "atelier-seaside-light",
-  "atelier-sulphurpool-dark",
-  "atelier-sulphurpool-light",
-  "atom-one-dark",
-  "atom-one-light",
+  // "brown-paper",
+  // "github",
+  // "dark",
+  // "dumi",
+  // "vue"
+  // "a11-dark",
+  // "a11-light",
+  // "agate",
+  // "an-old-hope",
+  // "androidstudio",
+  // "arduino-light",
+  // "arta",
+  // "ascetic",
+  // "atelier-cave-dark",
+  // "atelier-cave-light",
+  // "atelier-dune-dark",
+  // "atelier-dune-light",
+  // "atelier-estuary-dark",
+  // "atelier-estuary-light",
+  // "atelier-forest-dark",
+  // "atelier-forest-light",
+  // "atelier-heath-dark",
+  // "atelier-heath-light",
+  // "atelier-lakeside-dark",
+  // "atelier-lakeside-light",
+  // "atelier-plateau-dark",
+  // "atelier-plateau-light",
+  // "atelier-savanna-dark",
+  // "atelier-savanna-light",
+  // "atelier-seaside-dark",
+  // "atelier-seaside-light",
+  // "atelier-sulphurpool-dark",
+  // "atelier-sulphurpool-light",
+  // "atom-one-dark",
+  // "atom-one-light",
 ];
 
-export default function Home() {
-  const [input, setInput] = useState(txt);
+function prismjsFn(code,type){
+  return  Prism.highlight(code, Prism.languages.javascript, 'js')
+}
+
+ function Home({txt}) {
+  const [historyTxt,setHistoryTxt] = useState('');
+  const [input, setInput] = useState();
   const [colorTheme, setColorTheme] = useState("#00d084");
   const [codeSelect, setCodeSelect] = useState("");
+  const workerRef = useRef(null);
+  const simplemdeRef = useRef(null);
+
+  
+
   useEffect(() => {
-    marked.setOptions({
-      highlight: (code) => hljs.highlightAuto(code).value,
-      langPrefix: "hljs lang-",
-    });
+      const markedWorker = new Worker('markedWorker.js');
 
-    var simplemde = new SimpleMDE({
+      workerRef.current = markedWorker
+
+      markedWorker.addEventListener('message', function(e) {
+        setInput(e.data)
+      }, false);
+    let simplemde = new SimpleMDE({
       element: document.getElementById("TextArea"),
-      previewRender: function(plainText) {
-        return marked(plainText); // Returns HTML from a custom parser
-      },
     });
 
-    simplemde.codemirror.on("change", () => {
-      setInput(simplemde.value());
-    });
+    simplemdeRef.current = simplemde
+    
   }, []);
 
-  let renderer = useMemo(()=>{
-    const renderer = new marked.Renderer();
-    renderer.heading = function(text, level) {
-        return `<h${level} style="color:${colorTheme}"  id="${text}">${text}</h${level}>`;
-    }; 
-    return renderer
+  useEffect(()=>{
+    let temp =  window.sessionStorage.getItem('txt-md')
+      // 初始化数据
+    if(temp){
+      workerRef.current.postMessage({data:temp,colorTheme})
+      simplemdeRef.current.value(temp)
+    }else{
+      workerRef.current.postMessage({data:txt,colorTheme})
+      simplemdeRef.current.value(txt)
+
+    }
+  },[])
+
+  useEffect(()=>{
+    simplemdeRef.current.codemirror.on("change", () => {
+      let val = simplemdeRef.current.value()
+      // 每次更改触发
+      workerRef.current.postMessage({data:val,colorTheme})
+      window.sessionStorage.setItem('txt-md',val)
+    });
   },[colorTheme])
 
   let copyFn = useCallback(() => {
@@ -93,7 +117,7 @@ export default function Home() {
   let themeFn = useCallback((color) => {
     const { hex } = color;
     setColorTheme(hex);
-    document.body.setAttribute("style", `--themeColor:${hex}`);
+    workerRef.current.postMessage({data:'',colorTheme:hex})
   }, []);
 
   return (
@@ -107,7 +131,7 @@ export default function Home() {
             <div>
               <TextArea
                 id="TextArea"
-                onChange={(e) => setInput(e.target.value)}
+                defaultValue={historyTxt}
               />
             </div>
           </Col>
@@ -158,7 +182,7 @@ export default function Home() {
               className={`edit-wrap hljs ${codeSelect}`}
               id="edit-wrap"
               style={{ maxWidth: "578px", margin: "auto" }}
-              dangerouslySetInnerHTML={{ __html: marked(input,{renderer:renderer}) }}
+              dangerouslySetInnerHTML={{ __html: input  }}
             ></div>
           </Col>
         </Row>
@@ -166,3 +190,14 @@ export default function Home() {
     </Layout>
   );
 }
+
+export async function  getStaticProps (){
+
+  return {
+    props:{
+      txt
+    }
+  }
+}
+
+export default Home
