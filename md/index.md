@@ -6,8 +6,6 @@
 
 ## 我的公众号
 
-![微信公众号](http://blog.didispace.com/css/images/weixin.jpg)
-
 ## Markdown基础语法
 
 下面是Markdown的常用语法示例，可供参考

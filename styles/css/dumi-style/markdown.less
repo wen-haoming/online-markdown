@@ -88,6 +88,10 @@
   p {
     margin: 16px 0;
   }
+  code[class*="language-"] {
+    display: block;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  }
 
   // inline code
   *:not(pre) code {
@@ -96,18 +100,15 @@
     background: darken(@c-light-bg, 1%);
   }
 
-  code {
-    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-  }
+ 
 
   // code block
   pre {
     font-size: 14px;
-    background: darken(@c-light-bg, 1%);
-
-    &:not([class^='lang-']) {
+    // background: darken(@c-light-bg, 1%);
+    &:not([class^='language-']) {
       padding: 1em;
-    }
+    };
   }
 
   // horizontal line

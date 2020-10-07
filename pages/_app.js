@@ -2,7 +2,8 @@ import Head from "next/head";
 import "antd/dist/antd.css";
 import "../styles/globals.css";
 import "simplemde/dist/simplemde.min.css";
-import "../styles/themes/index.less";
+import "../styles/css/dumi-style/markdown.less";
+
 import { BackTop } from "antd";
 
 const style = {
@@ -26,16 +27,18 @@ function MyApp({ Component, pageProps }) {
       <Head>
         <title>在线markdown转为微信公众号文章</title>
         <link rel="icon" href="/favicon.ico" />
+        <script src="simplemde.min.js"></script>
         <link rel="stylesheet" href="prismjs/themes/prism.css"/>
-        <script src="https://cdn.bootcdn.net/ajax/libs/simplemde/1.9.0/simplemde.min.js"></script>
-        <script src="prismjs/plugins/autoloader/prism-autoloader.js"></script>
-        <script src="prismjs/components/prism-core.min.js"></script>
-      </Head>
+        <link rel="stylesheet" href="prismjs/plugins/line-numbers/prism.css" data-noprefix />
+
+        {/* <script src="prismjs/plugins/autoloader/prism-autoloader.js"></script> */}
+      </Head>   
       <BackTop>
         <div style={style}>顶部</div>
       </BackTop>
       <Component {...pageProps} />
-      <script src="prismjs/prism.js"></script>
+      {/* <script src="prismjs/prism.js"></script> */}
+       {/* <script src="prismjs/plugins/autoloader/prism-autoloader.min.js"></script> */}
     </>
   );
 }

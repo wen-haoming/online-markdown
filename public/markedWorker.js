@@ -1,45 +1,47 @@
+var Prism = {
+  disableWorkerMessageHandler: true,
+};
 importScripts('marked.js');
 importScripts('prismjs/prism.js')
-// importScripts('prismjs/components/prism-core.min.js')
-// importScripts('prismjs/plugins/autoloader/prism-autoloader.js')
-// importScripts('prismjs/components/index.js')
-// importScripts('prismjs/components.js')
-// importScripts('prismjs/dependencies.js')
 
-// loadLanguages(['sql']);
-
-
+// Prism.plugins.autoloader={
+//   languages_path:'path/to/grammars/'
+// }
 
 marked.setOptions({
   highlight: (code,type) => {
-    return  Prism.highlight(code, Prism.languages.javascript, 'javascript')
+      try{
+         let str =  Prism.highlight(code, Prism.languages[type], type)
+           str =  str.replace(/\n([ ]*)/g,($,$1)=>`\n<span>${$1}</span>`)
+          str =  str.replace(/(\n)/g,`<br/>`) 
+
+          // str =  `<div style="textAlign:left">` + str.replace(/[\n|\;\n]/g,`</div>$1<div style="textAlign:left">`) +'</div>'
+      return str
+      }catch(e){
+      }
   },
-  // langPrefix: "hljs lang-",
+  langPrefix: "code-outer language-",
+  // headerPrefix:"language-",
 });
 // marked( ,{renderer:renderer})
 
 let oldData = ''
 
+const renderer = new marked.Renderer();
+
 self.addEventListener('message', function(e) {
   // console.log(marked)
-  let {data,colorTheme,prismjsFn} = e.data
-
- 
-
+  let {data,colorTheme} = JSON.parse(e.data)
   if(!data){
     data = oldData
   }else{
     oldData = data
   }
-
-
-
-  const renderer = new marked.Renderer();
-
   renderer.heading = function(text, level) {
     return `<h${level} style="color:${colorTheme}"  id="${text}">${text}</h${level}>`;
 }; 
 
-  let renderText = marked(data,{renderer:renderer})
+  let renderText = marked(data,{renderer:renderer,preClass:true})
+  renderText = renderText.replace(/<pre>(.*?)<code.*?class="(.*?)".*?>/g, '<pre  style="display:flex" class="$2">$1<code  class="$2">')
   self.postMessage(renderText);
 }, false);
